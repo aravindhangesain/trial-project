@@ -118,7 +118,7 @@
   <script>
     async function loadProfile() {
       try {
-        const idRes = await fetch('http://127.0.0.1:8000/api/users/get_logged_in_user_id/');
+        const idRes = await fetch('/api/users/get_logged_in_user_id/');
         const idData = await idRes.json();
 
         if (!idData.user_id) {
@@ -129,7 +129,7 @@
         }
 
         const userId = idData.user_id;
-        const userRes = await fetch(`http://127.0.0.1:8000/api/users/${userId}/`);
+        const userRes = await fetch(`/api/users/${userId}/`);
         const userData = await userRes.json();
 
         document.getElementById('points').textContent = userData.points || 'N/A';

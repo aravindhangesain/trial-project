@@ -101,7 +101,7 @@
       {% endfor %}
     {% endif %}
 
-    <form method="post" action="http://127.0.0.1:8000/api/users/login/">
+    <form method="post" action="/api/users/login/">
       {% csrf_token %}
       <input type="text" name="username" placeholder="Username" required>
       <input type="password" name="password" placeholder="Password" required>
@@ -109,7 +109,7 @@
     </form>
 
     <div class="register-link">
-      Don't have an account? <a href="http://127.0.0.1:8000/api/users/register/">Register</a>
+      Don't have an account? <a href="/api/users/register/">Register</a>
     </div>
   </div>
 

@@ -151,7 +151,7 @@
 
     async function setUserID() {
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/users/get_logged_in_user_id/');
+        const res = await fetch('/api/users/get_logged_in_user_id/');
         const data = await res.json();
         if (data.user_id) {
           document.getElementById('user_id').value = data.user_id;
@@ -163,7 +163,7 @@
 
     async function loadApps() {
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/apps/');
+        const res = await fetch('/api/apps/');
         const apps = await res.json();
         const dropdown = document.getElementById('app_id');
 
@@ -185,17 +185,17 @@
       const message = document.getElementById('statusMessage');
       loader.style.display = 'block';
 
-      // Show message while spinning
+      // Show optimistic message first
       message.style.color = 'green';
       message.textContent = "Installation Verified, Please visit your profile for checking out the received rewards";
 
       const formData = new FormData(this);
 
       try {
-        // 3-second delay
+        // Simulate delay
         await new Promise(resolve => setTimeout(resolve, 3000));
 
-        const res = await fetch('http://127.0.0.1:8000/api/apps/verify_installation/', {
+        const res = await fetch('/api/apps/verify_installation/', {
           method: 'POST',
           body: formData
         });
