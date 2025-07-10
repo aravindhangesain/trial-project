@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #acb6e5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .register-container {
+      background-color: #fff;
+      padding: 35px 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      max-width: 500px;
+      width: 100%;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 25px;
+    }
+
+    .message {
+      text-align: center;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+    }
+
+    .message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .message.success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 18px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    .role-group {
+      margin-bottom: 20px;
+    }
+
+    .role-group p {
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    label {
+      margin-right: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #3498db;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    .login-link {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .login-link a {
+      color: #3498db;
+      text-decoration: none;
+    }
+
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="register-container">
+    <h2>Create Account</h2>
+
+    {% if error %}
+      <div class="message error">{{ error }}</div>
+    {% endif %}
+    {% if success %}
+      <div class="message success">{{ success }}</div>
+    {% endif %}
+
+    <form method="post" action="http://127.0.0.1:8000/api/users/register/" onsubmit="return validateForm();">
+      {% csrf_token %}
+
+      <input type="text" name="username" placeholder="Username" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="password" id="password" name="password" placeholder="Password" required>
+      <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
+      <input type="text" name="contact_number" placeholder="Contact Number">
+
+      <div class="role-group">
+        <p>Select Role:</p>
+        <label><input type="radio" name="role" value="User" required> User</label>
+        <label><input type="radio" name="role" value="Admin" required> Admin</label>
+      </div>
+
+      <button type="submit">Register</button>
+    </form>
+
+    <div class="login-link">
+      Already have an account? <a href="http://127.0.0.1:8000/api/users/login/">Login</a>
+    </div>
+  </div>
+
+  <script>
+    function validateForm() {
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirm_password").value;
+
+      if (password !== confirmPassword) {
+        alert("Passwords do not match!");
+        return false;
+      }
+
+      return true;
+    }
+  </script>
+
+</body>
+</html>

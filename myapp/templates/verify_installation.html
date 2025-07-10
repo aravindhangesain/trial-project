@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Verify Installation</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #e0f7fa, #ffffff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    form {
+      width: 420px;
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      position: relative;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 12px 0 6px;
+    }
+
+    select,
+    input[type="file"] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .upload-box {
+      margin-top: 12px;
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      text-align: center;
+      padding: 20px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .upload-box:hover {
+      border-color: #007bff;
+    }
+
+    .upload-box img {
+      max-width: 100%;
+      height: auto;
+      display: none;
+      margin-top: 10px;
+    }
+
+    .upload-placeholder {
+      font-size: 40px;
+      color: #aaa;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .message {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    .loader {
+      display: none;
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #007bff;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 15px auto 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <form id="verifyForm">
+    <h2>Verify Installation</h2>
+
+    <input type="hidden" name="user_id" id="user_id">
+
+    <label for="app_id">Select Installed App</label>
+    <select name="app_id" id="app_id" required>
+      <option value="">-- Choose an App --</option>
+    </select>
+
+    <label for="screenshots">Upload Screenshot</label>
+    <div class="upload-box" onclick="document.getElementById('screenshots').click();">
+      <div class="upload-placeholder" id="uploadPlaceholder">+</div>
+      <img id="preview" src="#" alt="Preview">
+    </div>
+    <input type="file" name="screenshots" id="screenshots" accept="image/*" required onchange="previewImage(event)">
+
+    <button type="submit">Verify Installation</button>
+
+    <div class="loader" id="loader"></div>
+    <div class="message" id="statusMessage"></div>
+  </form>
+
+  <script>
+    function previewImage(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      const preview = document.getElementById('preview');
+      const placeholder = document.getElementById('uploadPlaceholder');
+
+      if (file) {
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+          placeholder.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    async function setUserID() {
+      try {
+        const res = await fetch('http://127.0.0.1:8000/api/users/get_logged_in_user_id/');
+        const data = await res.json();
+        if (data.user_id) {
+          document.getElementById('user_id').value = data.user_id;
+        }
+      } catch (err) {
+        console.error("Error fetching user ID", err);
+      }
+    }
+
+    async function loadApps() {
+      try {
+        const res = await fetch('http://127.0.0.1:8000/api/apps/');
+        const apps = await res.json();
+        const dropdown = document.getElementById('app_id');
+
+        apps.forEach(app => {
+          const option = document.createElement('option');
+          option.value = app.id;
+          option.text = app.name;
+          dropdown.appendChild(option);
+        });
+      } catch (err) {
+        console.error("Error loading apps:", err);
+      }
+    }
+
+    document.getElementById('verifyForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const loader = document.getElementById('loader');
+      const message = document.getElementById('statusMessage');
+      loader.style.display = 'block';
+
+      // Show message while spinning
+      message.style.color = 'green';
+      message.textContent = "Installation Verified, Please visit your profile for checking out the received rewards";
+
+      const formData = new FormData(this);
+
+      try {
+        // 3-second delay
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        const res = await fetch('http://127.0.0.1:8000/api/apps/verify_installation/', {
+          method: 'POST',
+          body: formData
+        });
+
+        loader.style.display = 'none';
+
+        if (res.status === 201) {
+          setTimeout(() => {
+            window.location.href = '/api/users/profile_page/';
+          }, 1000);
+        } else {
+          const data = await res.json();
+          message.style.color = 'red';
+          message.textContent = data.detail || 'Verification failed.';
+        }
+
+      } catch (error) {
+        loader.style.display = 'none';
+        message.style.color = 'red';
+        message.textContent = 'Something went wrong.';
+      }
+    });
+
+    window.onload = () => {
+      setUserID();
+      loadApps();
+    };
+  </script>
+
+</body>
+</html>

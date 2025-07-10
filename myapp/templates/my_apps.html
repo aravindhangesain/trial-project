@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Installed Apps</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-top: 0;
+    }
+
+    .button-container {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .back-button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .back-button:hover {
+      background-color: #0056b3;
+    }
+
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .app-card {
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      text-align: center;
+      transition: 0.2s;
+    }
+
+    .app-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+
+    .app-logo {
+      max-width: 100px;
+      max-height: 100px;
+      object-fit: contain;
+    }
+
+    .app-name {
+      margin-top: 12px;
+      font-weight: bold;
+      font-size: 18px;
+      color: #444;
+    }
+
+    .app-points {
+      margin-top: 6px;
+      color: #777;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>My Verified Apps</h2>
+
+  <div class="button-container">
+    <button class="back-button" onclick="window.location.href='/api/users/dashboard/'">
+      ← Go Back to Dashboard
+    </button>
+  </div>
+
+  <div class="apps-grid" id="apps-container">
+    <!-- App cards will be inserted here -->
+  </div>
+
+  <script>
+    async function loadVerifiedApps() {
+      try {
+        // Fetch user ID first
+        const idRes = await fetch('/api/users/get_logged_in_user_id/');
+        const idData = await idRes.json();
+
+        if (!idData.user_id) {
+          alert("Not logged in!");
+          window.location.href = '/api/users/login/';
+          return;
+        }
+
+        const res = await fetch('/api/apps/verified_apps/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: idData.user_id })
+        });
+
+        const apps = await res.json();
+        const container = document.getElementById('apps-container');
+
+        if (!Array.isArray(apps) || apps.length === 0) {
+          container.innerHTML = "<p style='text-align:center;color:gray;'>No apps verified yet.</p>";
+          return;
+        }
+
+        apps.forEach(app => {
+          const card = document.createElement('div');
+          card.className = 'app-card';
+
+          const img = document.createElement('img');
+          img.className = 'app-logo';
+          img.src = app.app_logo || '';
+          img.alt = app.name;
+
+          const name = document.createElement('div');
+          name.className = 'app-name';
+          name.textContent = app.name;
+
+          const points = document.createElement('div');
+          points.className = 'app-points';
+          points.textContent = `Points: ${app.points}`;
+
+          card.appendChild(img);
+          card.appendChild(name);
+          card.appendChild(points);
+          container.appendChild(card);
+        });
+
+      } catch (error) {
+        console.error("Error loading apps:", error);
+        document.getElementById('apps-container').innerHTML = "<p>Error loading apps.</p>";
+      }
+    }
+
+    window.onload = loadVerifiedApps;
+  </script>
+</body>
+</html>

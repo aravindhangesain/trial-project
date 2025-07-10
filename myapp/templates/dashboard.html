@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f3f3f3;
+    }
+
+    .navbar {
+      background-color: #222;
+      color: white;
+      padding: 10px 20px;
+      height: 60px;
+      position: relative;
+    }
+
+    .welcome {
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 20px;
+      top: 50%;
+    }
+
+    .profile-container {
+      position: absolute;
+      right: 100px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+    }
+
+    .profile-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #fff;
+      color: #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .profile-info {
+      position: absolute;
+      top: 50px;
+      right: 0;
+      background-color: white;
+      color: #000;
+      border: 1px solid #ccc;
+      padding: 10px;
+      display: none;
+      z-index: 100;
+      min-width: 150px;
+      text-align: left;
+    }
+
+    .profile-info a {
+      display: block;
+      margin: 8px 0;
+      color: #007bff;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .profile-info a:hover {
+      text-decoration: underline;
+    }
+
+    .logout-btn {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: crimson;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .main-content {
+      display: flex;
+      height: calc(100vh - 60px);
+    }
+
+    .apps-section {
+      flex: 3;
+      padding: 30px;
+    }
+
+    .apps-header {
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 30px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .apps-container {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .app-card {
+      background-color: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .app-card:hover {
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .app-card img {
+      max-width: 100%;
+      max-height: 100px;
+    }
+
+    .app-name {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .role-card {
+      flex: 1;
+      background-color: white;
+      padding: 30px;
+      box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    .role-card h3 {
+      margin-bottom: 10px;
+      font-size: 20px;
+      color: #007bff;
+    }
+
+    .role-card p {
+      color: #444;
+    }
+
+    .role-card button {
+      margin-top: 20px;
+      background-color: #007bff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="welcome" id="welcome-text">Welcome</div>
+
+    <div class="profile-container" id="profile-container">
+      <div class="profile-icon" id="profile-initial">U</div>
+      <div class="profile-info" id="profile-info">
+        <p><strong id="profile-name">User</strong></p>
+        <p id="profile-role">Role</p>
+        <a onclick="fetchMyApps()">My Apps</a>
+        <a href="/api/users/profile_page/">Profile</a>
+      </div>
+    </div>
+
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <div class="main-content">
+    <div class="apps-section">
+      <div class="apps-header">Download apps and obtain great rewards</div>
+      <div class="apps-container" id="apps-container"></div>
+    </div>
+
+    <div class="role-card" id="role-card"></div>
+  </div>
+
+  <script>
+    let currentUserId = null;
+
+    async function loadDashboard() {
+      try {
+        const userRes = await fetch('/api/users/get_logged_in_user_id/');
+        const userData = await userRes.json();
+
+        if (!userData.user_id) {
+          alert('Not logged in.');
+          window.location.href = '/api/users/login/';
+          return;
+        }
+
+        currentUserId = userData.user_id;
+
+        const userDetails = await fetch(`/api/users/${currentUserId}/`);
+        const user = await userDetails.json();
+
+        document.getElementById('welcome-text').textContent = `Welcome, ${user.username}`;
+        document.getElementById('profile-name').textContent = user.username;
+        document.getElementById('profile-role').textContent = user.role;
+        document.getElementById('profile-initial').textContent = user.username.charAt(0).toUpperCase();
+
+        const roleCard = document.getElementById('role-card');
+        if (user.role.toLowerCase() === 'admin') {
+          roleCard.innerHTML = `
+            <h3>Admin Panel</h3>
+            <p>Manage and add apps for users to explore and earn points.</p>
+            <button onclick="window.location.href='/api/apps/add_app_form/'">Add App</button>
+          `;
+        } else {
+          roleCard.innerHTML = `
+            <h3>Claim Rewards</h3>
+            <p>Download apps and verify installation to earn exciting points!</p>
+            <button onclick="window.location.href='/api/apps/verify_installation_form/'">Verify Installation</button>
+          `;
+        }
+
+        const appsRes = await fetch('/api/apps/');
+        const apps = await appsRes.json();
+
+        const container = document.getElementById('apps-container');
+        container.innerHTML = '';
+
+        apps.forEach(app => {
+          const cardLink = document.createElement('a');
+          cardLink.href = `/api/apps/app_profile_page/?id=${app.id}`;
+
+          const card = document.createElement('div');
+          card.className = 'app-card';
+
+          const img = document.createElement('img');
+          img.src = app.app_logo;
+          img.alt = app.name;
+
+          const name = document.createElement('div');
+          name.className = 'app-name';
+          name.textContent = app.name;
+
+          card.appendChild(img);
+          card.appendChild(name);
+          cardLink.appendChild(card);
+          container.appendChild(cardLink);
+        });
+
+      } catch (error) {
+        console.error("Dashboard error:", error);
+      }
+    }
+
+    async function fetchMyApps() {
+      if (!currentUserId) return;
+      // Store user_id for use in my_apps_page
+      localStorage.setItem('logged_user_id', currentUserId);
+      // Navigate to my apps page
+      window.location.href = '/api/apps/my_apps_page/';
+    }
+
+    function logout() {
+      fetch('/api/users/logout/', { method: 'POST' })
+        .then(() => {
+        // Clear localStorage and sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // Reload the page (or redirect)
+        window.location.href = '/api/users/login/';
+      })
+      .catch(err => console.error('Logout failed', err));
+    }
+
+    function toggleProfileInfo(show = null) {
+      const info = document.getElementById('profile-info');
+      if (show === true) {
+        info.style.display = 'block';
+      } else if (show === false) {
+        info.style.display = 'none';
+      } else {
+        info.style.display = info.style.display === 'block' ? 'none' : 'block';
+      }
+    }
+
+    // Toggle on click
+    document.getElementById('profile-initial').addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleProfileInfo();
+    });
+
+    // Hide when clicking outside
+    document.addEventListener('click', (e) => {
+      const container = document.getElementById('profile-container');
+      if (!container.contains(e.target)) {
+        toggleProfileInfo(false);
+      }
+    });
+
+    window.onload = loadDashboard;
+  </script>
+</body>
+</html>

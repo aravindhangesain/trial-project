@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>App Profile</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .app-card {
+      background-color: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .app-logo {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .app-name {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .publisher {
+      font-size: 18px;
+      color: #777;
+      margin-bottom: 20px;
+    }
+
+    .points {
+      font-size: 20px;
+      color: #444;
+      margin-bottom: 10px;
+    }
+
+    .added-on {
+      font-size: 14px;
+      color: #999;
+    }
+
+    .back-btn {
+      margin-top: 30px;
+      padding: 10px 18px;
+      font-size: 14px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .error-message {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-card" id="app-card">
+    <img src="" alt="App Logo" class="app-logo" id="app-logo">
+    <div class="app-name" id="app-name">Loading...</div>
+    <div class="publisher" id="publisher">Publisher</div>
+    <div class="points">Points: <span id="points"></span></div>
+    <div class="added-on">Added on: <span id="added-on"></span></div>
+    <button class="back-btn" onclick="history.back()">Go Back</button>
+    <div class="error-message" id="error" style="display: none;"></div>
+  </div>
+
+  <script>
+    async function loadAppProfile() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const appId = urlParams.get('id');  // e.g., ?id=5
+
+      if (!appId) {
+        document.getElementById("error").textContent = "App ID not found in URL.";
+        document.getElementById("error").style.display = "block";
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/apps/${appId}/`);
+        if (!response.ok) throw new Error("Failed to fetch app data");
+
+        const app = await response.json();
+
+        document.getElementById("app-name").textContent = app.name;
+        document.getElementById("publisher").textContent = app.publisher;
+        document.getElementById("points").textContent = app.points;
+        document.getElementById("added-on").textContent = new Date(app.added_on).toLocaleDateString();
+        document.getElementById("app-logo").src = app.app_logo || 'https://via.placeholder.com/120?text=No+Logo';
+      } catch (err) {
+        document.getElementById("error").textContent = "Could not load app details.";
+        document.getElementById("error").style.display = "block";
+      }
+    }
+
+    window.onload = loadAppProfile;
+  </script>
+
+</body>
+</html>

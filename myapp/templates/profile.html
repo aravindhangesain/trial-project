@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Profile</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #ffffff);
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .profile-card {
+      background-color: #fff;
+      padding: 40px 35px;
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      width: 420px;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .profile-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .profile-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .profile-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background-color: #3498db;
+      color: white;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+    }
+
+    h2 {
+      margin: 0;
+      color: #333;
+    }
+
+    .profile-info {
+      line-height: 1.8;
+      color: #444;
+      font-size: 16px;
+    }
+
+    .profile-info p {
+      margin: 12px 0;
+    }
+
+    .profile-info strong {
+      display: inline-block;
+      width: 150px;
+      color: #666;
+    }
+
+    .error-message {
+      text-align: center;
+      color: red;
+      font-weight: bold;
+    }
+
+    .dashboard-button {
+      margin-top: 25px;
+      width: 100%;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      padding: 12px;
+      font-weight: bold;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .dashboard-button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="profile-avatar" id="avatar">A</div>
+      <h2 id="profile-heading">User Profile</h2>
+    </div>
+
+    <div class="profile-info" id="profile">
+      <p><strong>Username:</strong> <span id="username"></span></p>
+      <p><strong>Email:</strong> <span id="email"></span></p>
+      <p><strong>Contact Number:</strong> <span id="contact"></span></p>
+      <p><strong>Role:</strong> <span id="role"></span></p>
+      <p><strong>Points:</strong> <span id="points"></span></p>
+    </div>
+
+    <div class="error-message" id="error" style="display: none;"></div>
+
+    <!-- Go to Dashboard Button -->
+    <button class="dashboard-button" onclick="goToDashboard()">Go to Dashboard</button>
+  </div>
+
+  <script>
+    async function loadProfile() {
+      try {
+        const idRes = await fetch('http://127.0.0.1:8000/api/users/get_logged_in_user_id/');
+        const idData = await idRes.json();
+
+        if (!idData.user_id) {
+          document.getElementById('profile').style.display = "none";
+          document.getElementById('error').textContent = "User not logged in.";
+          document.getElementById('error').style.display = "block";
+          return;
+        }
+
+        const userId = idData.user_id;
+        const userRes = await fetch(`http://127.0.0.1:8000/api/users/${userId}/`);
+        const userData = await userRes.json();
+
+        document.getElementById('points').textContent = userData.points || 'N/A';
+        document.getElementById('username').textContent = userData.username;
+        document.getElementById('email').textContent = userData.email;
+        document.getElementById('contact').textContent = userData.contact_number || 'N/A';
+        document.getElementById('role').textContent = userData.role;
+        document.getElementById('avatar').textContent = userData.username.charAt(0).toUpperCase();
+        document.getElementById('profile-heading').textContent = `${userData.role} Profile`;
+
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('profile').style.display = "none";
+        document.getElementById('error').textContent = "Failed to load profile.";
+        document.getElementById('error').style.display = "block";
+      }
+    }
+
+    function goToDashboard() {
+      window.location.href = '/api/users/dashboard/';
+    }
+
+    window.onload = loadProfile;
+  </script>
+
+</body>
+</html>
