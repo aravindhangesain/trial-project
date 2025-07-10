@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key')
 
 # DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-DEBUG=False
+DEBUG=True
 
 ALLOWED_HOSTS = ['trial-project-production.up.railway.app', 'localhost', '127.0.0.1']
 
@@ -32,8 +32,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 ROOT_URLCONF = 'myproject.urls'  
 
