@@ -1,0 +1,11 @@
+[phases.setup]
+nixpkgsArchive = "https://github.com/NixOS/nixpkgs/archive/refs/tags/23.11.tar.gz"
+
+[phases.install]
+nixPkgs = [
+  "python312",
+  "python312Packages.setuptools",
+  "python312Packages.pip",
+  "python312Packages.wheel",
+  "python312Packages.distutils"
+]
