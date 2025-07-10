@@ -55,16 +55,17 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',  
-        'HOST': 'postgres.railway.internal',  
+        'NAME': 'railway',
         'USER': 'postgres',
         'PASSWORD': 'PZduFCFSqyCNOHdVhUohwewWUPhbRvmc',
-        'PORT': '5432',
+        'HOST': 'ballast.proxy.rlwy.net',
+        'PORT': '59212',
         'OPTIONS': {
             'sslmode': 'require',
         },
     }
 }
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
