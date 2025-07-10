@@ -60,6 +60,11 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         return render(request, 'register.html')
     
     @csrf_exempt
+    @action(detail=False, methods=['get'], url_path='landing_login')  
+    def landing_login(request):
+        return render(request, 'login.html')
+    
+    @csrf_exempt
     @action(detail=False, methods=['get', 'post'], url_path='login')
     def login(self, request):
         if request.method == 'POST':
